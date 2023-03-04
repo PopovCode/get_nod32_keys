@@ -1,0 +1,5 @@
+config.py
+/.idea
+/venv
+get_nod32_keys.iml
+/__pycache__
