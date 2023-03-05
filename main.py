@@ -7,14 +7,40 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
+import os
 
 import config
 
+import re
 
-def main():
-    get_html_page_get_out_webbrowser()
-    links = get_download_links()
-    print(links)
+
+def save_links_to_file(links):
+    with open(f'tmp/links.txt', 'a', encoding='utf-8') as file:
+        for link in links:
+            file.write(link)
+            file.write('\n')
+    print(f'[INFO] - Links saved to file')
+
+def clear_tmp_folder():
+    tmp_path = "tmp/"
+    tmp_files = os.listdir(tmp_path)
+    for f in tmp_files:
+        os.remove(os.path.join(tmp_path, f))
+    print(f'[INFO] - Temp folder is cleaning.... OK!')
+
+def get_keys_from_file(tmp_path):
+    files_list = os.listdir(tmp_path)
+    sample = r'\b\w{4}\b-\w{4}-\w{4}-\w{4}-\w{4}\b'
+    result = []
+    for file in files_list:
+        with open(f'{tmp_path}/{file}', 'r', encoding='utf-8') as f:
+            text = f.read()
+            keys = re.findall(sample, text)
+            result.extend(keys)
+
+    return result
+
+
 
 def get_html_page_get_out_webbrowser():
     driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
@@ -26,7 +52,7 @@ def get_html_page_get_out_webbrowser():
 
 
 def get_download_links():
-    with open('index.html', 'r', encoding='utf-8') as file:
+    with open('tmp/index.html', 'r', encoding='utf-8') as file:
         soup = BeautifulSoup(file, 'html.parser')
     links = []
     hidden_blocs = soup.find_all('blockquote', class_="ipsBlockquote built")
@@ -68,10 +94,17 @@ def click_all_hedden_content_buttons(driver):
 
 def save_html_to_file(driver):
     html = driver.page_source
-    with open('index.html', 'w', encoding='utf-8') as f:
+    with open('tmp/index.html', 'w', encoding='utf-8') as f:
         f.write(html)
     print('File saved!')
 
+def main():
+    # keys = get_keys_from_file('tmp')
+    # print(keys)
+    get_html_page_get_out_webbrowser()
+    links = get_download_links()
+    save_links_to_file(links=links)
+    # clear_tmp_folder()
 
 if __name__ == "__main__":
     main()
