@@ -2,14 +2,17 @@
 
 ## Get started:
 
-#### 1. Поднять venv
-    python -m venv env
-    pip install -r requirements.txt
+#### 1. Установить зависимости 
+    poetry install
 
 #### 2. Создать файл config.py:
     URL = 'https://philka.ru/forum'
     LOGIN = 'you_login'
     PASSWORD = 'you_password'
 
-#### 3. Запуск
-    python main.py
+#### 3. Создать папку tmp:
+    mkdir tmp
+
+#### 4. Запуск
+    poetry shell
+    python3 main.py
