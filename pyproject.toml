@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "get-nod32-keys"
+version = "0.1.0"
+description = ""
+authors = ["PopovCode <antoxamad@gmail.com>"]
+readme = "README.md"
+packages = [{include = "get_nod32_keys"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+beautifulsoup4 = "^4.11.2"
+selenium = "^4.8.2"
+webdriver-manager = "^3.8.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
