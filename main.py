@@ -81,7 +81,8 @@ def jump_to_the_right_section(driver, url, login, password):
         EC.presence_of_element_located((By.ID, "footer_utilities")))
     # Go to section
     driver.find_element(
-        By.XPATH, '//*[@id="category_36"]/div/div/div/div/table/tbody/tr[2]/td[2]/h4/strong/a').click()
+        By.XPATH, '//*[@id="category_36"]/div/div/div/div/table/tbody/'
+        + 'tr[2]/td[2]/h4/strong/a').click()
     WebDriverWait(driver=driver, timeout=10).until(
         EC.presence_of_element_located((By.ID, "footer_utilities")))
     # Go to NOD32 topic
