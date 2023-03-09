@@ -1,5 +1,3 @@
-import time
-
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
@@ -7,11 +5,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
-from os import listdir, path, remove
 
+import os
+import time
 import config
-
-
 import re
 
 
@@ -25,14 +22,14 @@ def save_links_to_file(links):
 
 def clear_tmp_folder():
     tmp_path = "tmp/"
-    tmp_files = listdir(tmp_path)
+    tmp_files = os.listdir(tmp_path)
     for tmp_f in tmp_files:
-        remove(path.join(tmp_path, tmp_f))
+        os.remove(os.path.join(tmp_path, tmp_f))
     print('[INFO] - Temp folder is cleaning.... OK!')
 
 
 def get_keys_from_file(tmp_path):
-    files_list = listdir(tmp_path)
+    files_list = os.listdir(tmp_path)
     sample = r'\b\w{4}\b-\w{4}-\w{4}-\w{4}-\w{4}\b'
     result = []
     for file in files_list:
