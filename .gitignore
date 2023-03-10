@@ -5,3 +5,4 @@ get_nod32_keys.iml
 /__pycache__
 index.html
 /tmp
+*.sqlite3
