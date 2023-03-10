@@ -10,14 +10,16 @@ import os
 import time
 import config
 import re
+import sqlite3
 
 
 def save_links_to_file(links):
-    with open('tmp/links.txt', 'a', encoding='utf-8') as file:
+    file_path = 'tmp/links.txt'
+    with open(file_path, 'a', encoding='utf-8') as file:
         for link in links:
             file.write(link)
             file.write('\n')
-    print('[INFO] - Links saved to file')
+    print(f'[INFO] - Links saved to file({file_path})')
 
 
 def clear_tmp_folder():
@@ -48,12 +50,21 @@ def get_html_page_get_out_webbrowser():
                               login=config.LOGIN, password=config.PASSWORD)
     click_all_hedden_content_buttons(driver)
     save_html_to_file(driver)
-    print('WebDriver complited!')
     driver.quit()
 
 
-def get_download_links():
-    with open('tmp/index.html', 'r', encoding='utf-8') as file:
+def save_html_to_file(driver):
+    file_path = 'tmp/index.html'
+    html = driver.page_source
+    with open(file_path, 'w', encoding='utf-8') as f:
+        f.write(html)
+    print(f'[INFO] - HTML saved to file({file_path})')
+
+
+def parsing_links_from_downloaded_html():
+    file_html_path = 'tmp/index.html'
+    print(f'[INFO] - Start parsing {file_html_path}')
+    with open(file_html_path, 'r', encoding='utf-8') as file:
         soup = BeautifulSoup(file, 'html.parser')
     links = []
     hidden_blocs = soup.find_all('blockquote', class_="ipsBlockquote built")
@@ -61,6 +72,7 @@ def get_download_links():
         link = item.find('pre', class_='prettyprint').text.strip()
         links.append(link)
 
+    print(f'[INFO] - Parsing {file_html_path} complete!')
     return links
 
 
@@ -100,20 +112,65 @@ def click_all_hedden_content_buttons(driver):
         time.sleep(1)
 
 
-def save_html_to_file(driver):
-    html = driver.page_source
-    with open('tmp/index.html', 'w', encoding='utf-8') as f:
-        f.write(html)
-    print('File saved!')
+def create_connection(db_file):
+    conn = None
+    try:
+        conn = sqlite3.connect(db_file)
+        print('[INFO]: Connect to database....OK\n')
+
+    except sqlite3.Error as error:
+        print('[INFO]: Connect to database....ERROR\n', error)
+
+    return conn
+
+
+def add_links_to_db(sqlite_connection, links):
+    cursor = sqlite_connection.cursor()
+    for link in links:
+        if check_key_from_db(sqlite_connection=sqlite_connection, link=link):
+            sql_insert_query = f"""
+            insert into keys (key_link) values ('{link}')
+            """
+            cursor.execute(sql_insert_query)
+            sqlite_connection.commit()
+            print(f'[INFO]: Ссылка {link} добавлена в db')
+        else:
+            print(f'[INFO]: Ссылка {link} уже есть в базе')
+            continue
+    cursor.close()
+
+
+def get_all_keys_from_db(sqlite_connection):
+    cursor = sqlite_connection.cursor()
+    sql_select = 'select * from keys'
+    cursor.execute(sql_select)
+    res = cursor.fetchall()
+    cursor.close()
+    return res
+
+
+def check_key_from_db(sqlite_connection, link):
+    cursor = sqlite_connection.cursor()
+    sql = f'select * from keys where key_link = "{link}"'
+    cursor.execute(sql)
+    res = cursor.fetchall()
+    if res:
+        return False
+    return True
 
 
 def main():
-    # keys = get_keys_from_file('tmp')
-    # print(keys)
     get_html_page_get_out_webbrowser()
-    links = get_download_links()
-    save_links_to_file(links=links)
-    # clear_tmp_folder()
+    links = parsing_links_from_downloaded_html()
+
+    sqlite_connection = create_connection(db_file=config.DB_FILE)
+    add_links_to_db(sqlite_connection=sqlite_connection, links=links)
+
+    if sqlite_connection:
+        sqlite_connection.close()
+    print('\n[INFO]: Close connect to database....OK')
+
+    clear_tmp_folder()
 
 
 if __name__ == "__main__":
